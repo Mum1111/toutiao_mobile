@@ -1,7 +1,6 @@
 <template>
   <div id="app">
-    <h4>app</h4>
-    <router-view/>
+    <router-view />
   </div>
 </template>
 
@@ -12,5 +11,8 @@ export default {
 </script>
 
 <style lang="less">
-
+.sdsd{
+  height: 70px;
+  background-color: teal;
+}
 </style>
