@@ -22,4 +22,14 @@ const verCode = mobile => {
   })
 }
 
-export { login, verCode }
+/**
+ * 获取用户自己的信息
+ */
+const getUser = () => {
+  return request({
+    method: 'GET',
+    url: '/app/v1_0/user'
+  })
+}
+
+export { login, verCode, getUser }

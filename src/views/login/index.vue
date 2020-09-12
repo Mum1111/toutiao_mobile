@@ -78,7 +78,7 @@ export default {
   methods: {
     // 点击左侧的按钮 切换页面
     onClickLeft () {
-      console.log('返回')
+      this.$router.back()
     },
     async onLogin () {
       this.$toast.loading({
@@ -93,6 +93,7 @@ export default {
         this.$toast.success('登录成功')
         this.$store.commit('setUser', res.data)
         // 如果成功进行下一步操作
+        this.$router.push('/my')
       } catch (err) {
         if (err || err.response.status !== 201) {
           return this.$toast.fail('登录失败,手机号或验证码输入错误')

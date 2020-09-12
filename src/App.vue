@@ -11,8 +11,5 @@ export default {
 </script>
 
 <style lang="less">
-.sdsd{
-  height: 70px;
-  background-color: teal;
-}
+
 </style>
