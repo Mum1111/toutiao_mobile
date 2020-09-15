@@ -1,27 +1,148 @@
 <template>
-    <div>
-        <h3>首页</h3>
-    </div>
+  <div class="home-container">
+    <!-- 导航栏 -->
+    <van-nav-bar id="page-nav-bar" fixed>
+      <van-button slot="title" type="info" icon="search" class="search-btn" round size="small">搜索</van-button>
+    </van-nav-bar>
+    <!-- tabs栏 -->
+    <van-tabs v-model="active" animated swipeable class="channel-tabs">
+      <van-tab :title="item.name" v-for="item in userChannel" :key="item.id">
+        <article-list :channel="item"></article-list>
+      </van-tab>
+      <div slot="nav-right" class="palceholder"></div>
+      <div slot="nav-right" class="hanbuger-btn" @click="showPopup">
+        <i class="toutiao toutiao-gengduo"></i>
+      </div>
+    </van-tabs>
+    <van-popup v-model="show" position="bottom" :style="{ height: '95%' }" round>
+      <channel-edit :userChannel="userChannel" :active="active" @checkChannel="checkChannel" @removeChannel="removeChannel"></channel-edit>
+    </van-popup>
+  </div>
 </template>
 
 <script>
+import { getChannels } from '@/api/channel.js'
+import ArticleList from './components/article-list.vue'
+import ChannelEdit from './components/channel-edit.vue'
 export default {
   name: 'HomePage',
   props: [],
+  components: {
+    ArticleList,
+    ChannelEdit
+  },
   data () {
     return {
-
+      active: 0,
+      userChannel: [],
+      show: false
     }
   },
   created () {
-
+    this.loadUserChannel()
   },
   methods: {
-
+    async loadUserChannel () {
+      const { data: res } = await getChannels()
+      // console.log(res)
+      this.userChannel = res.data.channels
+    },
+    showPopup () {
+      this.show = true
+    },
+    checkChannel (index) {
+      this.active = index
+      this.show = false
+    },
+    removeChannel (index) {
+      if (index === -1) {
+        index = 0
+      }
+      this.active = index
+      this.show = true
+    }
   }
 }
 </script>
 
 <style lang="less" scoped>
+.home-container {
+  padding-bottom: 100px;
+  #page-nav-bar {
+    /deep/.van-nav-bar__title {
+      max-width: 100%;
+      .search-btn {
+        width: 555px;
+        height: 70px;
+        background-color: rgb(3, 146, 146);
+        border: none;
+        font-size: 32px;
+        .van-icon {
+          font-size: 44px;
+          color: #fff;
+        }
+      }
+    }
+  }
 
+  /deep/.channel-tabs {
+    .van-tabs__wrap {
+      position: fixed;
+      top: 92px;
+      z-index: 20;
+      width: 100%;
+    }
+    .van-tabs__content {
+      padding-top: 172px;
+    }
+    .van-tabs__nav {
+      padding-bottom: 0;
+      .van-tab {
+        border-right: 1px solid #eee;
+        font-size: 26px;
+        color: #777777;
+        min-width: 200px;
+        height: 80px;
+      }
+      .van-tab--active {
+        color: teal;
+        font-size: 30px;
+      }
+      .van-tabs__line {
+        background-color: teal;
+        bottom: 0;
+        width: 34px;
+        height: 8px;
+      }
+      .hanbuger-btn {
+        position: fixed;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0.902;
+        width: 67px;
+        height: 82px;
+        background-color: #fff;
+        i.toutiao {
+          font-size: 32px;
+        }
+        &:before {
+          content: "";
+          position: absolute;
+          left: 0;
+          width: 2px;
+          height: 100%;
+          background: url("~@/assets/gradient-gray-line.png");
+          background-size: contain;
+        }
+      }
+      .palceholder {
+        width: 67px;
+        height: 80px;
+        flex-shrink: 0;
+      }
+    }
+  }
+}
 </style>
