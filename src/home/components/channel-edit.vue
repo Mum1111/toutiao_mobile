@@ -26,7 +26,9 @@
 </template>
 
 <script>
-import { getAllChannels } from '@/api/channel.js'
+import { getAllChannels, addUserChannel, deleteUserChannels } from '@/api/channel.js'
+import { mapState } from 'vuex'
+import { setItem } from '@/utils/storage'
 export default {
   name: 'ChannelEdit',
   props: {
@@ -52,18 +54,40 @@ export default {
     async loadAllChannel () {
       try {
         const { data: res } = await getAllChannels()
-        console.log(res)
+        // console.log(res)
         this.allChannels = res.data.channels
       } catch (err) {
         console.log('请求失败', err)
       }
     },
-    onAddChannel (value) {
+    // 添加频道操作
+    async onAddChannel (value) {
+      // console.log(value)
+      // 把推荐频道中的数据推送到我的频道中
       this.userChannel.push(value)
+      if (this.user) {
+        // 用户已经登录 把添加的频道数据上传到服务器
+        console.log('jinru')
+        try {
+          // console.log(111)
+          await addUserChannel({
+            id: value.id,
+            seq: this.userChannel.length
+          })
+          // console.log('添加数据', res)
+        } catch (err) {
+          console.log('添加失败', err)
+        }
+      } else {
+        // 用户没有登录 把添加的频道列表传到本地存储
+        setItem('TOUTIAO_CHANNEL', this.userChannel)
+      }
     },
     isEditShow () {
+      // 显示或隐藏 右上角的叉号
       this.isEdit = !this.isEdit
     },
+    // 点击我的频道触发的事件(删除或者跳转)
     onMyChannelClick (value, index) {
       if (this.isEdit) {
         // 执行删除操作
@@ -71,9 +95,25 @@ export default {
           this.$emit('removeChannel', this.active - 1)
         }
         this.userChannel.splice(index, 1)
+        // 删除频道持久化操作
+        this.deleteChannel(value)
       } else {
-        // 执行切换操作
+        // 执行切换操作 跳转到home页 选中当前选中的按钮
         this.$emit('checkChannel', index)
+      }
+    },
+    // 删除频道
+    async deleteChannel (value) {
+      if (this.user) {
+        try {
+        // console.log(111)
+          const { data } = await deleteUserChannels(value.id)
+          console.log(data)
+        } catch (err) {
+          console.log('删除失败', err)
+        }
+      } else {
+        setItem('TOUTIAO_CHANNEL', this.userChannel)
       }
     }
   },
@@ -84,7 +124,8 @@ export default {
           return item.id === it.id
         })
       })
-    }
+    },
+    ...mapState(['user'])
   }
 }
 </script>

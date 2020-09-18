@@ -10,7 +10,7 @@
         error-text="请求失败，点击重新加载"
       >
        <!--  <van-cell v-for="item in list" :key="item.art_id" :title="item.title" /> -->
-        <article-item v-for="item in list" :key="item.art_id" :article="item" />
+        <article-item v-for="(item,index) in list" :key="index" :article="item" />
       </van-list>
     </van-pull-refresh>
   </div>
@@ -52,7 +52,7 @@ export default {
           timestamp: this.timestamp || Date.now(),
           with_top: 1
         })
-        console.log(res)
+        // console.log(res)
         const { results } = res.data
         this.list.push(...results)
         // 数据获取成功后 结束loading操作

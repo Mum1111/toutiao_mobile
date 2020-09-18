@@ -19,4 +19,11 @@ const getArticles = params => {
   })
 }
 
-export { getUserChannel, getArticles }
+const getArticleById = id => {
+  return request({
+    method: 'GET',
+    url: `/app/v1_0/articles/${id}`
+  })
+}
+
+export { getUserChannel, getArticles, getArticleById }

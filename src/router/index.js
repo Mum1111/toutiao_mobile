@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Login from '@/views/login'
+import Search from '@/views/search/search.vue'
 
 Vue.use(VueRouter)
 
@@ -35,6 +36,14 @@ const routes = [
         component: () => import('@/vedio/vedio.vue')
       }
     ]
+  },
+  { path: '/search', name: 'SearchPage', component: Search },
+  {
+    path: '/article/:articleId',
+    name: 'article',
+    component: () => import('@/views/article'),
+    // 将路由动态参数映射到组件的 props 中，更推荐这种做法
+    props: true
   }
 ]
 

@@ -1,8 +1,8 @@
 <template>
   <div class="home-container">
     <!-- 导航栏 -->
-    <van-nav-bar id="page-nav-bar" fixed>
-      <van-button slot="title" type="info" icon="search" class="search-btn" round size="small">搜索</van-button>
+    <van-nav-bar id="page-nav-bar"  fixed >
+      <van-button slot="title" type="info" icon="search" class="search-btn" round size="small" to="/search">搜索</van-button>
     </van-nav-bar>
     <!-- tabs栏 -->
     <van-tabs v-model="active" animated swipeable class="channel-tabs">
@@ -15,7 +15,7 @@
       </div>
     </van-tabs>
     <van-popup v-model="show" position="bottom" :style="{ height: '95%' }" round>
-      <channel-edit :userChannel="userChannel" :active="active" @checkChannel="checkChannel" @removeChannel="removeChannel"></channel-edit>
+      <channel-edit :userChannel="userChannel" :active="active" @checkChannel="checkChannel" @removeChannel="removeChannel" ></channel-edit>
     </van-popup>
   </div>
 </template>
@@ -24,6 +24,8 @@
 import { getChannels } from '@/api/channel.js'
 import ArticleList from './components/article-list.vue'
 import ChannelEdit from './components/channel-edit.vue'
+import { mapState } from 'vuex'
+import { getItem } from '@/utils/storage'
 export default {
   name: 'HomePage',
   props: [],
@@ -39,13 +41,37 @@ export default {
     }
   },
   created () {
+    // 加载用户频道列表
     this.loadUserChannel()
+  },
+  computed: {
+    ...mapState(['user'])
   },
   methods: {
     async loadUserChannel () {
-      const { data: res } = await getChannels()
-      // console.log(res)
-      this.userChannel = res.data.channels
+      // 优化
+      if (this.user) {
+        // 判断用户登录 从后台获取用户频道
+        // 获取频道列表
+        const { data: res } = await getChannels()
+        this.userChannel = res.data.channels
+        // console.log(this.userChannel)
+      } else {
+        const localChannel = getItem('TOUTIAO_CHANNEL')
+        // 用户没有登录 从本地存储获取频道列表
+        if (localChannel.length !== 0) {
+          this.userChannel = localChannel
+        } else {
+          try {
+            const { data: res } = await getChannels()
+            this.userChannel = res.data.channels
+            console.log(this.userChannel)
+          } catch (err) {
+            console.log('请求失败', err)
+          }
+        }
+        // console.log(this.userChannel)
+      }
     },
     showPopup () {
       this.show = true
