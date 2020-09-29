@@ -8,11 +8,11 @@
                 round
                 class="avatar"
                 fit="cover"
-                src="https://img.yzcdn.cn/vant/cat.jpeg"
+                :src="userInfo.photo"
               />
-              <span class="username">木米</span>
+              <span class="username">{{userInfo.name}}</span>
             </div>
-            <van-button round type="default" class="edit-info">编辑资料</van-button>
+            <van-button round type="default" class="edit-info" to="/profile">编辑资料</van-button>
           </div>
           <div class="style-datas">
             <div class="user-data">

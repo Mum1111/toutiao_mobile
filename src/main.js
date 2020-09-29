@@ -10,6 +10,8 @@ import '@/utils/dayjs.js'
 
 Vue.use(Vant)
 
+Vue.prototype.$bus = new Vue()
+
 Vue.config.productionTip = false
 
 new Vue({

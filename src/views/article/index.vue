@@ -36,25 +36,19 @@
           />
           <div slot="title" class="user-name">{{articles.aut_name}}</div>
           <div slot="label" class="publish-date">{{articles.pubdate|RelativeTime}}</div>
-          <van-button
-            class="follow-btn"
-            type="info"
-            color="#3296fa"
-            round
-            size="small"
-            icon="plus"
-          >关注</van-button>
-          <!-- <van-button
-            class="follow-btn"
-            round
-            size="small"
-          >已关注</van-button> -->
+
+          <!-- 关注用户按钮 -->
+          <follow-user :authorId="articles.aut_id" v-model="articles.is_followed"></follow-user>
+          <!-- 关注用户按钮 -->
         </van-cell>
         <!-- /用户信息 -->
 
         <!-- 文章内容 -->
         <div class="article-content markdown-body" ref="contentRef" v-html="articles.content"></div>
         <van-divider>正文结束</van-divider>
+        <!-- 文章评论 -->
+        <article-comment :list="commentList" :articleId="articles.art_id" @onload-success="commentTotal=$event.total_count"></article-comment>
+        <!-- 文章评论 -->
       </div>
       <!-- /加载完成-文章详情 -->
 
@@ -81,23 +75,33 @@
         type="default"
         round
         size="small"
+        @click="isCommentShow=true"
       >写评论</van-button>
       <van-icon
         name="comment-o"
-        info="123"
+        :info="commentTotal"
         color="#777"
       />
-      <van-icon
-        color="#777"
-        name="star-o"
-      />
-      <van-icon
+      <!-- 收藏文章 -->
+      <like-article :authorId="articles.art_id" v-model="articles.attitude"></like-article>
+      <!-- 收藏文章 -->
+      <!-- 点赞文章 -->
+      <collect-article :authorId="articles.art_id" v-model="articles.is_collected"></collect-article>
+      <!-- <van-icon
         color="#777"
         name="good-job-o"
-      />
+      /> -->
+      <!-- 点赞文章 -->
       <van-icon name="share" color="#777777"></van-icon>
     </div>
     <!-- /底部区域 -->
+    <van-popup v-model="isCommentShow" position="bottom">
+      <post-comment :articleId="articles.art_id" @post-success="onPostSuccess"></post-comment>
+    </van-popup>
+
+    <van-popup v-model="isReplyShow" round :style="{ height: '92%' }" position="bottom">
+      <comment-reply :comment="replyList" v-if="isReplyShow"></comment-reply>
+    </van-popup>
   </div>
 </template>
 
@@ -105,9 +109,22 @@
 import { getArticleById } from '@/api/article.js'
 import './github-markdown.css'
 import { ImagePreview } from 'vant'
+import FollowUser from '@/components/follow-user.vue'
+import LikeArticle from '@/components/like-article.vue'
+import CollectArticle from '@/components/collect-article.vue'
+import ArticleComment from './components/article-comment.vue'
+import PostComment from './components/comment-post/comment-post.vue'
+import CommentReply from './components/comment-reply/comment-reply.vue'
 export default {
   name: 'ArticleIndex',
-  components: {},
+  components: {
+    FollowUser,
+    LikeArticle,
+    CollectArticle,
+    ArticleComment,
+    PostComment,
+    CommentReply
+  },
   props: {
     articleId: {
       type: [Number, String, Object],
@@ -118,13 +135,22 @@ export default {
     return {
       articles: {},
       isloading: true,
-      isNotFound: false
+      isNotFound: false,
+      commentTotal: 0,
+      isCommentShow: false,
+      commentList: [],
+      isReplyShow: false,
+      replyList: {}
     }
   },
   computed: {},
   watch: {},
   created () {
     this.loadArticleById()
+    this.$bus.$on('reply-comment', (obj) => {
+      this.replyList = obj
+      this.isReplyShow = true
+    })
   },
   mounted () {},
   methods: {
@@ -161,6 +187,10 @@ export default {
           })
         }
       })
+    },
+    onPostSuccess (res) {
+      this.commentList.unshift(res.data.data.new_obj)
+      this.isCommentShow = false
     }
   }
 }
